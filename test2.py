@@ -1,36 +1,38 @@
 def zadatak():
     prviBroj=int(input("Unesite prvi broj"))
     drugiBroj=int(input("Unesite drugi broj"))
-    broj1=prviBroj
-    broj2=drugiBroj
-    tempPrviBroj=0
-    tempDrugiBroj=0
-    flag=0
 
-    radSBrojevima(prviBroj,drugiBroj)
+
+    if(radSBrojevima(prviBroj,drugiBroj) and radSBrojevima(drugiBroj,prviBroj)):
+        print("Sve znamenke prvog broja postoje u drugom i obrnuto")
 
     
 
-zadatak()
+
 
 def postojBroj(broj1,broj2):
+    tempbroj2=0
     while(broj2!=0):
-        
-        if(broj2==broj1):
+        tempbroj2=broj2%10
+        if(tempbroj2==broj1):
             return True
+        broj2=broj2//10
 
 def radSBrojevima(broj1,broj2):
-    tempBroj2=0
     tempBroj1=0
+    brojacPostojecihBrojeva=0
+    brojacZnamenkiUBroju=0
 
     while(broj1!=0):
         tempBroj1=broj1%10
-
-        while(broj2!=0):
-            tempBroj2=broj2%10
-            postojBroj(tempBroj1,tempBroj2)
-            broj2=broj2 //10
-
+        if postojBroj(tempBroj1,broj2):
+            brojacPostojecihBrojeva=brojacPostojecihBrojeva+1
         broj1=broj1 //10
+        brojacZnamenkiUBroju=brojacZnamenkiUBroju+1
+
+    if(brojacPostojecihBrojeva==brojacZnamenkiUBroju):
+        return True
 
 
+
+zadatak()
