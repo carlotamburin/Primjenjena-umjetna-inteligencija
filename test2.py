@@ -35,4 +35,6 @@ def radSBrojevima(broj1,broj2):
 
 
 
-zadatak()
+if __name__ == "__main__":
+    zadatak()
+
