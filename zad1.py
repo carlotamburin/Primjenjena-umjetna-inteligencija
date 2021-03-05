@@ -23,22 +23,25 @@ def zadatak():
                         continue
 
                     jednadzba = z/(x+y) + y/(z+x) + x/(z+y)
-                    try:
-                        if(jednadzba == 4):
-                            if((x, y, z) not in listaPredenih):
-                                listaPredenih.append((x, y, z))
-                                print(
-                                    "Nadeno je rjesenje: {0} {1} {2}".format(x, y, z))
-                                print("zbroj je:{0}".format(
-                                    abs(x)+abs(y)+abs(z)))
-                                brojac = brojac+1
-                    except ZeroDivisionError:
-                        pass
+                    if(jednadzba == 4):
+                        if((x, y, z) not in listaPredenih):
+                            listaPredenih.append((x, y, z))
+                            print(
+                                "Nadeno je rjesenje: {0} {1} {2}".format(x, y, z))
+                            print("zbroj je:{0}".format(
+                                abs(x)+abs(y)+abs(z)))
+                            brojac = brojac+1
+                            if(brojac == 10):
+                                return listaPredenih
 
         rangeMin = rangeMin-1
         rangeMax = rangeMax+1
     print("Ukupno ima :{0} rjesenja".format(brojac))
 
 
+def ispis():
+    print(zadatak())
+
+
 if __name__ == "__main__":
-    zadatak()
+    ispis()
