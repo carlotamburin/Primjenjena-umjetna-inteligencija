@@ -15,14 +15,14 @@ def igra():
     while(zamisljeniBroj != pogadanje):
 
         if(pogadanje < zamisljeniBroj):
-            print("Probani Broj je manji od zamisljenog broja")
+            print("Zamisljeni broj je veci od pogadanja")
             minGranica = pogadanje
             pogadanje = random.randrange(minGranica+1, maxGranica)
             brojPodagadanja = brojPodagadanja+1
             continue
 
         if(pogadanje > zamisljeniBroj):
-            print("Probani Broj je veci od zamisljenog broja")
+            print("Zamisljeni broj je manji od pogadanja")
             maxGranica = pogadanje
             pogadanje = random.randrange(minGranica, maxGranica)
             brojPodagadanja = brojPodagadanja+1
