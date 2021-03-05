@@ -28,7 +28,7 @@ def igra():
             brojPodagadanja = brojPodagadanja+1
             continue
 
-        brojPodagadanja = brojPodagadanja+11
+        brojPodagadanja = brojPodagadanja+1
 
     print("Pogodili ste broj u: {0} pogadanja".format(brojPodagadanja))
 
