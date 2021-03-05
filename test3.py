@@ -19,6 +19,6 @@ def igra():
 
     print("Pogodili ste broj")
 
+
 if __name__ == "__main__":
     igra()
-
