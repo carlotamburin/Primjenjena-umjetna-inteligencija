@@ -2,7 +2,6 @@ from random import shuffle
 import copy
 import random
 from typing import KeysView
-from test import CARDS_VALUE
 
 
 class Card:
@@ -181,7 +180,7 @@ class Treseta():
                     self.racunaloRuka, "AI").changeHandState()
                 if(self.racunaloRuka.count() == 0):       # Kada ruka bude prazna
                     break
-                if(self.igra.count() != 0):
+                if(self.igra.count() != 0):  # Ako je deck prazan ne vuci nego samo ucitaj proslo stanje
                     self.racunaloRuka = self.racunaloRuka.toString().split(
                         ",")+self.igra.drawOne().toString().split(",")
                 else:
