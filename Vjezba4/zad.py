@@ -125,7 +125,7 @@ class Stanje():
                 tempDesnaObala.strip()
                 mogucaStanja.append(tempLijevaObala+"||"+" "+tempDesnaObala)
 
-            # Napravi sad zamjene elemenata
+            # Napravi sad zamjene elemenata, prvo gledamo 2-1
             if (("V" in lijevaObala) and ("O" in lijevaObala)) and ("K" in desnaObala):
                 tempDesnaObala = desnaObala.replace("K", "V")
                 tempLijevaObala = lijevaObala.replace("V", "K")
@@ -151,6 +151,34 @@ class Stanje():
 
                 tempDesnaObala = desnaObala.replace("V", "K")
                 tempLijevaObala = lijevaObala.replace("K", "V")
+                mogucaStanja.append(tempLijevaObala+"||"+" "+tempDesnaObala)
+
+            # gledamo 1-2
+            if ("K" in lijevaObala) and (("V" in desnaObala) and ("O" in desnaObala)):
+                tempDesnaObala = desnaObala.replace("V", "K")
+                tempLijevaObala = lijevaObala.replace("K", "V")
+                mogucaStanja.append(tempLijevaObala+"||"+" "+tempDesnaObala)
+
+                tempDesnaObala = desnaObala.replace("O", "K")
+                tempLijevaObala = lijevaObala.replace("K", "O")
+                mogucaStanja.append(tempLijevaObala+"||"+" "+tempDesnaObala)
+
+            if ("O" in lijevaObala) and (("V" in desnaObala) and ("K" in desnaObala)):
+                tempDesnaObala = desnaObala.replace("V", "O")
+                tempLijevaObala = lijevaObala.replace("O", "V")
+                mogucaStanja.append(tempLijevaObala+"||"+" "+tempDesnaObala)
+
+                tempDesnaObala = desnaObala.replace("K", "O")
+                tempLijevaObala = lijevaObala.replace("O", "K")
+                mogucaStanja.append(tempLijevaObala+"||"+" "+tempDesnaObala)
+
+            if ("V" in lijevaObala) and (("O" in desnaObala) and ("K" in desnaObala)):
+                tempDesnaObala = desnaObala.replace("O", "V")
+                tempLijevaObala = lijevaObala.replace("V", "O")
+                mogucaStanja.append(tempLijevaObala+"||"+" "+tempDesnaObala)
+
+                tempDesnaObala = desnaObala.replace("K", "V")
+                tempLijevaObala = lijevaObala.replace("V", "K")
                 mogucaStanja.append(tempLijevaObala+"||"+" "+tempDesnaObala)
 
         return mogucaStanja
