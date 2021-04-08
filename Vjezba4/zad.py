@@ -59,9 +59,8 @@ class Stanje():
             return True
         return False
 
-    def action(self):
-        moguceAkcije = self.next_states()
-        self.stanjeIgre = choice(moguceAkcije)
+    def action(self, stanje):
+        self.stanjeIgre = choice(stanje)
 
     def copy(self):
         kopijaStanja = copy.deepcopy(self.stanjeIgre)
@@ -217,14 +216,36 @@ class Stanje():
         return mogucaStanja
 
 
+def generate(d, visited):
+    for stanje in igra.next_states():
+        igra.action([stanje])
+        d[stanje] = igra
+        if stanje not in visited:
+            visited.append(stanje)
+        else:
+            return
+        generate(d, visited)
+        igra.undo_action(igra.copy())
+
+
 if __name__ == '__main__':
+    # Deklariranje i inicijaliziranje varijabli
+    brojac = 10
+    d = {}
+    visited = []
+
+    # Pozivanje funkcija
     igra = Stanje()
     print("Pocetno stanje: ", igra)
-    pprint.pprint(igra.next_states())
+    stanjaMoguca = igra.next_states()
+    pprint.pprint(stanjaMoguca)
     print("Jeli igra rijesena: {0}".format(igra.is_solved()))
     print("Jeli stanje konacno: ", igra.is_terminal())
     kopiranoStanje = igra.copy()
-    igra.action()
+    igra.action(stanjaMoguca)
     print("Promjenjeno stanje: ", igra)
     igra.undo_action(kopiranoStanje)
     print("Promjenjeno stanje nazad s undo-om: ", igra)
+    generate(d, visited)
+    pprint.pprint(visited)
+    # print(len(visited))
