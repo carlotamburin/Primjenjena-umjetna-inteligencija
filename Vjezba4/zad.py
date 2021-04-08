@@ -162,56 +162,92 @@ class Stanje():
             if (("V" in lijevaObala) and ("O" in lijevaObala)) and ("K" in desnaObala):
                 tempDesnaObala = desnaObala.replace("K", "V")
                 tempLijevaObala = lijevaObala.replace("V", "K")
+                if "B" not in lijevaObala:
+                    tempLijevaObala = tempLijevaObala.replace('-', "B", 1)
+                    tempDesnaObala = tempDesnaObala.replace("B", "-", 1)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
                 tempDesnaObala = desnaObala.replace("K", "O")
                 tempLijevaObala = lijevaObala.replace("O", "K")
+                if "B" not in lijevaObala:
+                    tempLijevaObala = tempLijevaObala.replace('-', "B", 1)
+                    tempDesnaObala = tempDesnaObala.replace("B", "-", 1)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
             if (("V" in lijevaObala) and ("K" in lijevaObala)) and ("O" in desnaObala):
                 tempDesnaObala = desnaObala.replace("O", "V")
                 tempLijevaObala = lijevaObala.replace("V", "O")
+                if "B" not in lijevaObala:
+                    tempLijevaObala = tempLijevaObala.replace('-', "B", 1)
+                    tempDesnaObala = tempDesnaObala.replace("B", "-", 1)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
                 tempDesnaObala = desnaObala.replace("O", "K")
                 tempLijevaObala = lijevaObala.replace("K", "O")
+                if "B" not in lijevaObala:
+                    tempLijevaObala = tempLijevaObala.replace('-', "B", 1)
+                    tempDesnaObala = tempDesnaObala.replace("B", "-", 1)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
             if (("O" in lijevaObala) and ("K" in lijevaObala)) and ("V" in desnaObala):
                 tempDesnaObala = desnaObala.replace("V", "O")
                 tempLijevaObala = lijevaObala.replace("O", "V")
+                if "B" not in lijevaObala:
+                    tempLijevaObala = tempLijevaObala.replace('-', "B", 1)
+                    tempDesnaObala = tempDesnaObala.replace("B", "-", 1)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
                 tempDesnaObala = desnaObala.replace("V", "K")
                 tempLijevaObala = lijevaObala.replace("K", "V")
+                if "B" not in lijevaObala:
+                    tempLijevaObala = tempLijevaObala.replace('-', "B", 1)
+                    tempDesnaObala = tempDesnaObala.replace("B", "-", 1)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
             # gledamo 1-2
             if ("K" in lijevaObala) and (("V" in desnaObala) and ("O" in desnaObala)):
                 tempDesnaObala = desnaObala.replace("V", "K")
                 tempLijevaObala = lijevaObala.replace("K", "V")
+                if "B" not in lijevaObala:
+                    tempLijevaObala = tempLijevaObala.replace('-', "B", 1)
+                    tempDesnaObala = tempDesnaObala.replace("B", "-", 1)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
                 tempDesnaObala = desnaObala.replace("O", "K")
                 tempLijevaObala = lijevaObala.replace("K", "O")
+                if "B" not in lijevaObala:
+                    tempLijevaObala = tempLijevaObala.replace('-', "B", 1)
+                    tempDesnaObala = tempDesnaObala.replace("B", "-", 1)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
             if ("O" in lijevaObala) and (("V" in desnaObala) and ("K" in desnaObala)):
                 tempDesnaObala = desnaObala.replace("V", "O")
                 tempLijevaObala = lijevaObala.replace("O", "V")
+                if "B" not in lijevaObala:
+                    tempLijevaObala = tempLijevaObala.replace('-', "B", 1)
+                    tempDesnaObala = tempDesnaObala.replace("B", "-", 1)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
                 tempDesnaObala = desnaObala.replace("K", "O")
                 tempLijevaObala = lijevaObala.replace("O", "K")
+                if "B" not in lijevaObala:
+                    tempLijevaObala = tempLijevaObala.replace('-', "B", 1)
+                    tempDesnaObala = tempDesnaObala.replace("B", "-", 1)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
             if ("V" in lijevaObala) and (("O" in desnaObala) and ("K" in desnaObala)):
                 tempDesnaObala = desnaObala.replace("O", "V")
                 tempLijevaObala = lijevaObala.replace("V", "O")
+                if "B" not in lijevaObala:
+                    tempLijevaObala = tempLijevaObala.replace('-', "B", 1)
+                    tempDesnaObala = tempDesnaObala.replace("B", "-", 1)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
                 tempDesnaObala = desnaObala.replace("K", "V")
                 tempLijevaObala = lijevaObala.replace("V", "K")
+                if "B" not in lijevaObala:
+                    tempLijevaObala = tempLijevaObala.replace('-', "B", 1)
+                    tempDesnaObala = tempDesnaObala.replace("B", "-", 1)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
         return mogucaStanja
 
