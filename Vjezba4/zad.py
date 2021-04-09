@@ -8,8 +8,10 @@ from random import choice
 # VUK ___KOZA___ KUPUS
 # 3. Uzima vuka ostavlja kozu
 # 4. Vraca se po kozu
+disii
 
-def provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala):
+
+def provjeraBroda(lijevaObala, desnaObala, tempLijevaObala, tempDesnaObala):
     if "B" not in lijevaObala:
         if "B" in desnaObala:
             tempLijevaObala = tempLijevaObala.replace('-', "B", 1)
@@ -20,30 +22,30 @@ def provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala):
             tempDesnaObala = tempDesnaObala.replace('-', "B", 1)
             tempLijevaObala = tempLijevaObala.replace("B", "-", 1)
 
+
 def arePermutation(str1, str2):
     # Get lenghts of both strings
     n1 = len(str1)
     n2 = len(str2)
- 
+
     # If length of both strings is not same,
     # then they cannot be Permutation
     if (n1 != n2):
         return False
- 
+
     # Sort both strings
     a = sorted(str1)
     str1 = " ".join(a)
     b = sorted(str2)
     str2 = " ".join(b)
- 
+
     # Compare sorted strings
     for i in range(0, n1, 1):
         if (str1[i] != str2[i]):
             return False
- 
+
     return True
 
-    
 
 class Stanje():
     _lijevaObala = ""
@@ -147,106 +149,112 @@ class Stanje():
             if "V" in lijevaObala:
                 tempLijevaObala = lijevaObala.replace("V", "-", 1)
                 tempDesnaObala = desnaObala.replace("-", "V", 1)
-                provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                provjeraBroda(lijevaObala, desnaObala,
+                              tempLijevaObala, tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
             if "O" in lijevaObala:
                 tempLijevaObala = lijevaObala.replace("O", "-", 1)
                 tempDesnaObala = desnaObala.replace("-", "O", 1)
-                provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                provjeraBroda(lijevaObala, desnaObala,
+                              tempLijevaObala, tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
             if "K" in lijevaObala:
                 tempLijevaObala = lijevaObala.replace("K", "-", 1)
                 tempDesnaObala = desnaObala.replace("-", "K", 1)
-                provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                provjeraBroda(lijevaObala, desnaObala,
+                              tempLijevaObala, tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
             # Dodajemo s desne na lijevu
             if "V" in desnaObala:
                 tempDesnaObala = desnaObala.replace("V", "-", 1)
                 tempLijevaObala = lijevaObala.replace("-", "V", 1)
-                provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                provjeraBroda(lijevaObala, desnaObala,
+                              tempLijevaObala, tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
             if "O" in desnaObala:
                 tempDesnaObala = desnaObala.replace("O", "-", 1)
                 tempLijevaObala = lijevaObala.replace("-", "O", 1)
-                provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                provjeraBroda(lijevaObala, desnaObala,
+                              tempLijevaObala, tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
             if "K" in desnaObala:
                 tempDesnaObala = desnaObala.replace("K", "-", 1)
                 tempLijevaObala = lijevaObala.replace("-", "K", 1)
-                provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                provjeraBroda(lijevaObala, desnaObala,
+                              tempLijevaObala, tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
             # Napravi sad zamjene elemenata, prvo gledamo 2-1
             if (("V" in lijevaObala) and ("O" in lijevaObala)) and ("K" in desnaObala):
                 tempDesnaObala = desnaObala.replace("K", "V")
                 tempLijevaObala = lijevaObala.replace("V", "K")
-                #provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
                 tempDesnaObala = desnaObala.replace("K", "O")
                 tempLijevaObala = lijevaObala.replace("O", "K")
-                #provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
             if (("V" in lijevaObala) and ("K" in lijevaObala)) and ("O" in desnaObala):
                 tempDesnaObala = desnaObala.replace("O", "V")
                 tempLijevaObala = lijevaObala.replace("V", "O")
-                #provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
                 tempDesnaObala = desnaObala.replace("O", "K")
                 tempLijevaObala = lijevaObala.replace("K", "O")
-                #provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
             if (("O" in lijevaObala) and ("K" in lijevaObala)) and ("V" in desnaObala):
                 tempDesnaObala = desnaObala.replace("V", "O")
                 tempLijevaObala = lijevaObala.replace("O", "V")
-                #provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
                 tempDesnaObala = desnaObala.replace("V", "K")
                 tempLijevaObala = lijevaObala.replace("K", "V")
-                #provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
             # gledamo 1-2
             if ("K" in lijevaObala) and (("V" in desnaObala) and ("O" in desnaObala)):
                 tempDesnaObala = desnaObala.replace("V", "K")
                 tempLijevaObala = lijevaObala.replace("K", "V")
-                #provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
                 tempDesnaObala = desnaObala.replace("O", "K")
                 tempLijevaObala = lijevaObala.replace("K", "O")
-                #provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
             if ("O" in lijevaObala) and (("V" in desnaObala) and ("K" in desnaObala)):
                 tempDesnaObala = desnaObala.replace("V", "O")
                 tempLijevaObala = lijevaObala.replace("O", "V")
-                #provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
                 tempDesnaObala = desnaObala.replace("K", "O")
                 tempLijevaObala = lijevaObala.replace("O", "K")
-                #provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
             if ("V" in lijevaObala) and (("O" in desnaObala) and ("K" in desnaObala)):
                 tempDesnaObala = desnaObala.replace("O", "V")
                 tempLijevaObala = lijevaObala.replace("V", "O")
-                #provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
 
                 tempDesnaObala = desnaObala.replace("K", "V")
                 tempLijevaObala = lijevaObala.replace("V", "K")
-                #provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
+                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
                 mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
         return mogucaStanja
 
@@ -261,8 +269,6 @@ def generate(d, visited):
             return
         generate(d, visited)
         igra.undo_action(igra.copy())
-
-
 
 
 if __name__ == '__main__':
@@ -286,4 +292,4 @@ if __name__ == '__main__':
     generate(d, visited)
     pprint.pprint(visited)
     print(len(visited))
-    print(arePermutation("--BO","VKOB"))
+    print(arePermutation("--BO", "VKOB"))
