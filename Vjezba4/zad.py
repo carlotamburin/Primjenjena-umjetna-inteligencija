@@ -19,6 +19,30 @@ def provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala):
         if "B" in lijevaObala:
             tempDesnaObala = tempDesnaObala.replace('-', "B", 1)
             tempLijevaObala = tempLijevaObala.replace("B", "-", 1)
+
+def arePermutation(str1, str2):
+    # Get lenghts of both strings
+    n1 = len(str1)
+    n2 = len(str2)
+ 
+    # If length of both strings is not same,
+    # then they cannot be Permutation
+    if (n1 != n2):
+        return False
+ 
+    # Sort both strings
+    a = sorted(str1)
+    str1 = " ".join(a)
+    b = sorted(str2)
+    str2 = " ".join(b)
+ 
+    # Compare sorted strings
+    for i in range(0, n1, 1):
+        if (str1[i] != str2[i]):
+            return False
+ 
+    return True
+
     
 
 class Stanje():
@@ -262,3 +286,4 @@ if __name__ == '__main__':
     generate(d, visited)
     pprint.pprint(visited)
     print(len(visited))
+    print(arePermutation("--BO","VKOB"))
