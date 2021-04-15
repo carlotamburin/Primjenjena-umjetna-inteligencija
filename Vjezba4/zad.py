@@ -1,29 +1,17 @@
 import copy
 import pprint
 from random import choice
-# Vuk koza kupus
+from collections import deque
 # Vuk Koza Kupus ________
 # 1. VUK KUPUS _______ KOZA
 # 2, Odnosi kupus uzima kozu
 # VUK ___KOZA___ KUPUS
 # 3. Uzima vuka ostavlja kozu
 # 4. Vraca se po kozu
-disii
-
-
-def provjeraBroda(lijevaObala, desnaObala, tempLijevaObala, tempDesnaObala):
-    if "B" not in lijevaObala:
-        if "B" in desnaObala:
-            tempLijevaObala = tempLijevaObala.replace('-', "B", 1)
-            tempDesnaObala = tempDesnaObala.replace("B", "-", 1)
-
-    elif "B" not in desnaObala:
-        if "B" in lijevaObala:
-            tempDesnaObala = tempDesnaObala.replace('-', "B", 1)
-            tempLijevaObala = tempLijevaObala.replace("B", "-", 1)
 
 
 def arePermutation(str1, str2):
+
     # Get lenghts of both strings
     n1 = len(str1)
     n2 = len(str2)
@@ -40,38 +28,27 @@ def arePermutation(str1, str2):
     str2 = " ".join(b)
 
     # Compare sorted strings
-    for i in range(0, n1, 1):
-        if (str1[i] != str2[i]):
-            return False
+    if a == b:
+        return True
 
-    return True
+    return False
 
 
 class Stanje():
-    _lijevaObala = ""
-    _desnaObala = ""
 
-    def __init__(self):
-        self.stanjeIgre = "----  ||  VOBK"
-        self.brojacLijeveStane = 3
-        self.brojadDesneStrane = 0
+    def __init__(self, pocetnoStanje="VOKB  ||  ----"):
+        self.lijevaObala = pocetnoStanje[:4]
+        self.desnaObala = pocetnoStanje[-4:]
 
     def __str__(self):
-        return self.stanjeIgre
+        return self.lijevaObala + '  ||  ' + self.desnaObala
 
-    def vrati_odvojene_obale(self):
-        lijevaObala = self.stanjeIgre.split("|", 1)[0]
-        desnaObala = self.stanjeIgre.split("|", 1)[1]
-        desnaObala = desnaObala[1:]
-        desnaObala = desnaObala.strip()
-        Stanje._desnaObala = desnaObala
-        Stanje._lijevaObala = lijevaObala
-
-        return lijevaObala, desnaObala
+    def copy(self):
+        return copy.deepcopy(self)
 
     def is_solved(self):
         string = "VKBO"
-        obala = list(Stanje._desnaObala)
+        obala = list(self.desnaObala)
         postojeLiCharovi = [characters in obala for characters in string]
         if all(postojeLiCharovi):
             return True
@@ -79,217 +56,141 @@ class Stanje():
             return False
 
     def is_terminal(self):
-        lijevObala, desnaObala = self.vrati_odvojene_obale()
-        obalaD = list(desnaObala)
-        obalaL = list(lijevObala)
+        obalaD = list(self.desnaObala)
+        obalaL = list(self.lijevaObala)
         if self.is_solved():
             return True
 
+        if self.lijevaObala == "VOKB":
+            return False
+
         provjeraRjesenjaDesno = [characters in obalaD for characters in "VO"]
         provjeraRjesenjaLijevo = [characters in obalaL for characters in "VO"]
-        if all(provjeraRjesenjaDesno) or all(provjeraRjesenjaLijevo):
+        if all(provjeraRjesenjaDesno) and "B" not in obalaD:
+            return True
+        if all(provjeraRjesenjaLijevo) and "B" not in obalaL:
             return True
 
         provjeraRjesenjaDesno = [characters in obalaD for characters in "OK"]
         provjeraRjesenjaLijevo = [characters in obalaL for characters in "OK"]
-        if all(provjeraRjesenjaDesno) or all(provjeraRjesenjaLijevo):
+        if all(provjeraRjesenjaDesno) and "B" not in obalaD:
             return True
+        if all(provjeraRjesenjaLijevo) and "B" not in obalaL:
+            return True
+
         return False
 
-    def action(self, stanje):
-        self.stanjeIgre = choice(stanje)
+    def undo_action(self, action):
+        if action in self.lijevaObala:
+            if action == "B":
+                self.lijevaObala = self.lijevaObala.replace(action, "-", 1)
+                self.desnaObala = self.desnaObala.replace("-", action, 1)
+            else:
+                self.lijevaObala = self.lijevaObala.replace(action, '-', 1)
+                self.desnaObala = self.desnaObala.replace("-", action, 1)
+                self.lijevaObala = self.lijevaObala.replace("B", "-", 1)
+                self.desnaObala = self.desnaObala.replace("-", "B", 1)
 
-    def copy(self):
-        kopijaStanja = copy.deepcopy(self.stanjeIgre)
-        return kopijaStanja
+        else:
+            if action == "B":
+                self.desnaObala = self.desnaObala.replace(action, "-", 1)
+                self.lijevaObala = self.lijevaObala.replace("-", action, 1)
 
-    def undo_action(self, kopija):
-        self.stanjeIgre = kopija
+            else:
+                self.desnaObala = self.desnaObala.replace(action, "-", 1)
+                self.lijevaObala = self.lijevaObala.replace("-", action, 1)
+                self.desnaObala = self.desnaObala.replace("B", "-", 1)
+                self.lijevaObala = self.lijevaObala.replace("-", "B", 1)
+
+    def all_actions(self):
+        listaAkcija = []
+
+        if "B" in self.lijevaObala:
+            for el in self.lijevaObala:
+                if el != "-":
+                    listaAkcija.append(el)
+        else:
+            for el in self.desnaObala:
+                if el != "-":
+                    listaAkcija.append(el)
+
+        return listaAkcija
 
     def next_states(self):
-        brojacL = 0
-        brojacD = 0
-        strana = "lijeva"
-        mogucaStanja = []
+        listaStanja = []
 
-        tempLijevaObala = ""
-        tempDesnaObala = ""
+        for akcija in self.all_actions():
+            self.action(akcija)
+            # MOzes  self stavit pa posli __str__
+            listaStanja.append(self.__str__())
+            self.undo_action(akcija)
 
-        for el in self.stanjeIgre:
-            if el == "|":
-                strana = "desna"
-                continue
-            if(strana == "lijeva"):
-                if el == "V" or el == "O" or el == "K":
-                    brojacL = brojacL+1
-            elif(strana == "desna"):
-                if el == "V" or el == "O" or el == "K":
-                    brojacD = brojacD+1
+        return listaStanja
 
-        if(brojacL == 3):  # uvjet 3-0
-            mogucaStanja.append("VO-- ||  BK--")
-            mogucaStanja.append("VK-- ||  BO--")
-            mogucaStanja.append("OK-- ||  BV--")
-        if(brojacD == 3):  # uvjet 0-3
-            mogucaStanja.append("--VB || --OK")
-            mogucaStanja.append("--OB || --VK")
-            mogucaStanja.append("--KB || --OV")
+    def action(self, action):
 
-        lijevaObala = self.stanjeIgre.split("|", 1)[0]
-        desnaObala = self.stanjeIgre.split("|", 1)[1]
-        desnaObala = desnaObala[1:]
-        desnaObala = desnaObala.strip()
+        if action in self.lijevaObala:
+            if action == "B":
+                self.lijevaObala = self.lijevaObala.replace(action, "-", 1)
+                self.desnaObala = self.desnaObala.replace("-", action, 1)
+            else:
+                self.lijevaObala = self.lijevaObala.replace(action, "-", 1)
+                self.desnaObala = self.desnaObala.replace("-", action, 1)
+                self.lijevaObala = self.lijevaObala.replace("B", "-", 1)
+                self.desnaObala = self.desnaObala.replace("-", "B", 1)
 
-        Stanje._desnaObala = desnaObala
-        Stanje._lijevaObala = lijevaObala
-        # print(desnaObala)
-
-        # uvjet 2-1 i 1-2 dodavanje s jedne na drugu (s lijeve na desnu)
-        if((brojacL == 2 and brojacD == 1) or (brojacL == 1 and brojacD == 2)):
-            if "V" in lijevaObala:
-                tempLijevaObala = lijevaObala.replace("V", "-", 1)
-                tempDesnaObala = desnaObala.replace("-", "V", 1)
-                provjeraBroda(lijevaObala, desnaObala,
-                              tempLijevaObala, tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-            if "O" in lijevaObala:
-                tempLijevaObala = lijevaObala.replace("O", "-", 1)
-                tempDesnaObala = desnaObala.replace("-", "O", 1)
-                provjeraBroda(lijevaObala, desnaObala,
-                              tempLijevaObala, tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-            if "K" in lijevaObala:
-                tempLijevaObala = lijevaObala.replace("K", "-", 1)
-                tempDesnaObala = desnaObala.replace("-", "K", 1)
-                provjeraBroda(lijevaObala, desnaObala,
-                              tempLijevaObala, tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-            # Dodajemo s desne na lijevu
-            if "V" in desnaObala:
-                tempDesnaObala = desnaObala.replace("V", "-", 1)
-                tempLijevaObala = lijevaObala.replace("-", "V", 1)
-                provjeraBroda(lijevaObala, desnaObala,
-                              tempLijevaObala, tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-            if "O" in desnaObala:
-                tempDesnaObala = desnaObala.replace("O", "-", 1)
-                tempLijevaObala = lijevaObala.replace("-", "O", 1)
-                provjeraBroda(lijevaObala, desnaObala,
-                              tempLijevaObala, tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-            if "K" in desnaObala:
-                tempDesnaObala = desnaObala.replace("K", "-", 1)
-                tempLijevaObala = lijevaObala.replace("-", "K", 1)
-                provjeraBroda(lijevaObala, desnaObala,
-                              tempLijevaObala, tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-            # Napravi sad zamjene elemenata, prvo gledamo 2-1
-            if (("V" in lijevaObala) and ("O" in lijevaObala)) and ("K" in desnaObala):
-                tempDesnaObala = desnaObala.replace("K", "V")
-                tempLijevaObala = lijevaObala.replace("V", "K")
-                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-                tempDesnaObala = desnaObala.replace("K", "O")
-                tempLijevaObala = lijevaObala.replace("O", "K")
-                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-            if (("V" in lijevaObala) and ("K" in lijevaObala)) and ("O" in desnaObala):
-                tempDesnaObala = desnaObala.replace("O", "V")
-                tempLijevaObala = lijevaObala.replace("V", "O")
-                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-                tempDesnaObala = desnaObala.replace("O", "K")
-                tempLijevaObala = lijevaObala.replace("K", "O")
-                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-            if (("O" in lijevaObala) and ("K" in lijevaObala)) and ("V" in desnaObala):
-                tempDesnaObala = desnaObala.replace("V", "O")
-                tempLijevaObala = lijevaObala.replace("O", "V")
-                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-                tempDesnaObala = desnaObala.replace("V", "K")
-                tempLijevaObala = lijevaObala.replace("K", "V")
-                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-            # gledamo 1-2
-            if ("K" in lijevaObala) and (("V" in desnaObala) and ("O" in desnaObala)):
-                tempDesnaObala = desnaObala.replace("V", "K")
-                tempLijevaObala = lijevaObala.replace("K", "V")
-                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-                tempDesnaObala = desnaObala.replace("O", "K")
-                tempLijevaObala = lijevaObala.replace("K", "O")
-                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-            if ("O" in lijevaObala) and (("V" in desnaObala) and ("K" in desnaObala)):
-                tempDesnaObala = desnaObala.replace("V", "O")
-                tempLijevaObala = lijevaObala.replace("O", "V")
-                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-                tempDesnaObala = desnaObala.replace("K", "O")
-                tempLijevaObala = lijevaObala.replace("O", "K")
-                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-            if ("V" in lijevaObala) and (("O" in desnaObala) and ("K" in desnaObala)):
-                tempDesnaObala = desnaObala.replace("O", "V")
-                tempLijevaObala = lijevaObala.replace("V", "O")
-                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-
-                tempDesnaObala = desnaObala.replace("K", "V")
-                tempLijevaObala = lijevaObala.replace("V", "K")
-                # provjeraBroda(lijevaObala,desnaObala,tempLijevaObala,tempDesnaObala)
-                mogucaStanja.append(tempLijevaObala+"||"+"  "+tempDesnaObala)
-        return mogucaStanja
-
-
-def generate(d, visited):
-    for stanje in igra.next_states():
-        igra.action([stanje])
-        d[stanje] = igra
-        if stanje not in visited:
-            visited.append(stanje)
         else:
-            return
-        generate(d, visited)
-        igra.undo_action(igra.copy())
+            if action == "B":
+                self.desnaObala = self.desnaObala.replace(action, "-", 1)
+                self.lijevaObala = self.lijevaObala.replace("-", action, 1)
+            else:
+                self.desnaObala = self.desnaObala.replace(action, "-", 1)
+                self.lijevaObala = self.lijevaObala.replace("-", action, 1)
+                self.desnaObala = self.desnaObala.replace("B", "-", 1)
+                self.lijevaObala = self.lijevaObala.replace("-", "B", 1)
+
+
+def generate(d, igra):
+    if igra.is_terminal():
+        return True
+    for akcija in igra.all_actions():
+        igra.action(akcija)
+        for el in d:
+            if arePermutation(el, igra.__str__()) == True:
+                continue
+            else:
+                d[igra.__str__()] = igra
+        if not d:
+            d[igra.__str__()] = igra
+        rezultat = generate(d, igra)
+        igra.undo_action(akcija)
+        if rezultat:
+            return True
+    return False
 
 
 if __name__ == '__main__':
     # Deklariranje i inicijaliziranje varijabli
-    brojac = 10
     d = {}
-    visited = []
-
     # Pozivanje funkcija
-    igra = Stanje()
+    igra = Stanje("VOB- || -K--")
     print("Pocetno stanje: ", igra)
-    stanjaMoguca = igra.next_states()
-    pprint.pprint(stanjaMoguca)
-    print("Jeli igra rijesena: {0}".format(igra.is_solved()))
-    print("Jeli stanje konacno: ", igra.is_terminal())
-    kopiranoStanje = igra.copy()
-    igra.action(stanjaMoguca)
-    print("Promjenjeno stanje: ", igra)
-    igra.undo_action(kopiranoStanje)
-    print("Promjenjeno stanje nazad s undo-om: ", igra)
-    generate(d, visited)
-    pprint.pprint(visited)
-    print(len(visited))
-    print(arePermutation("--BO", "VKOB"))
+    print(igra.is_terminal())
+    #stanjaMoguca, akcijeMoguce = igra.next_states()
+    # pprint.pprint(stanjaMoguca)
+    #print("Jeli igra rijesena: {0}".format(igra.is_solved()))
+    #print("Jeli stanje konacno: ", igra.is_terminal())
+    #kopiranoStanje = igra.copy()
+    print(igra.next_states())
+    akcije = igra.all_actions()
+    igra.action(akcije[0])
+
+    print(igra)
+    print(igra.is_terminal())
+    igra.undo_action(akcije[0])
+    print(igra)
+    print(igra.is_terminal())
+    generate(d, igra)
+    pprint.pprint(d)
+    #akcija = igra.action(choice(stanjaMoguca))
+    # igra.undo_action(akcija)
