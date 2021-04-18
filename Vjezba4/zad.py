@@ -151,29 +151,53 @@ class Stanje():
 
 
 def generate(d, igra):
+    if postojiLiUDictu(d, igra.__str__()):
+        return False
+    d[igra.__str__()] = igra
     if igra.is_terminal():
         return True
     for akcija in igra.all_actions():
         igra.action(akcija)
-        for el in d:
-            if arePermutation(el, igra.__str__()) == True:
-                continue
-            else:
-                d[igra.__str__()] = igra
-        if not d:
-            d[igra.__str__()] = igra
-        rezultat = generate(d, igra)
+        generate(d, igra)
         igra.undo_action(akcija)
-        if rezultat:
-            return True
     return False
+
+
+def postojiLiUDictu(d, element):
+    lijevaStranaEl, desnaStranaEl = element[:4], element[-4:]
+    if "B" in lijevaStranaEl:
+        for el in d:
+            if arePermutation(lijevaStranaEl, el[:4]) == True:
+                return True
+            else:
+                continue
+    else:
+        for el in d:
+            if arePermutation(desnaStranaEl, el[-4:]) == True:
+                return True
+            else:
+                continue
+    return False
+
+
+def Dfs(igra):
+    q = deque()
+    visited = []
+
+    while q:
+        for akcija in igra.all_actions():
+            # igra.action(akcija)
+            q.extendleft(akcija)
+
+        igra.action(q.popleft())
+        visited.append(igra.__str__())
 
 
 if __name__ == '__main__':
     # Deklariranje i inicijaliziranje varijabli
     d = {}
     # Pozivanje funkcija
-    igra = Stanje("VOB- || -K--")
+    igra = Stanje()
     print("Pocetno stanje: ", igra)
     print(igra.is_terminal())
     #stanjaMoguca, akcijeMoguce = igra.next_states()
@@ -192,5 +216,7 @@ if __name__ == '__main__':
     print(igra.is_terminal())
     generate(d, igra)
     pprint.pprint(d)
+    print(len(d))
+    Dfs(igra)
     #akcija = igra.action(choice(stanjaMoguca))
     # igra.undo_action(akcija)
