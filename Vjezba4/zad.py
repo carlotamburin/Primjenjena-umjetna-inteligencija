@@ -36,7 +36,7 @@ def arePermutation(str1, str2):
 
 class Stanje():
 
-    def __init__(self, pocetnoStanje="VOKB  ||  ----"):
+    def __init__(self, pocetnoStanje):
         self.lijevaObala = pocetnoStanje[:4]
         self.desnaObala = pocetnoStanje[-4:]
 
@@ -45,6 +45,10 @@ class Stanje():
 
     def copy(self):
         return copy.deepcopy(self)
+
+    def changeState(self, stanje):
+        self.lijevaObala = stanje[:4]
+        self.desnaObala = stanje[-4:]
 
     def is_solved(self):
         string = "VKBO"
@@ -121,8 +125,7 @@ class Stanje():
 
         for akcija in self.all_actions():
             self.action(akcija)
-            # MOzes  self stavit pa posli __str__
-            listaStanja.append(self.__str__())
+            listaStanja.append(self.copy())
             self.undo_action(akcija)
 
         return listaStanja
@@ -180,24 +183,32 @@ def postojiLiUDictu(d, element):
     return False
 
 
-def Dfs(igra):
-    q = deque()
-    visited = []
-
+def Dfs(igra, lista):
+    ck = igra.copy()
+    q = []
+    visited = {}
+    q.append((ck, ck))
     while q:
-        for akcija in igra.all_actions():
-            # igra.action(akcija)
-            q.extendleft(akcija)
-
-        igra.action(q.popleft())
-        visited.append(igra.__str__())
+        k = q.pop()
+        ck = k[1].copy()
+        if ck.is_terminal():
+            continue
+        if ck.__str__() not in visited:
+            lista.append(k)
+            visited[ck.__str__()] = ck
+            igra.changeState(ck.__str__())
+            for stanje in igra.next_states():
+                q.append((ck, stanje.copy()))
+    return visited
 
 
 if __name__ == '__main__':
     # Deklariranje i inicijaliziranje varijabli
     d = {}
+    listaParentChild = []
+    dictParentChild = {}
     # Pozivanje funkcija
-    igra = Stanje()
+    igra = Stanje("VOKB  ||  ----")
     print("Pocetno stanje: ", igra)
     print(igra.is_terminal())
     #stanjaMoguca, akcijeMoguce = igra.next_states()
@@ -205,7 +216,7 @@ if __name__ == '__main__':
     #print("Jeli igra rijesena: {0}".format(igra.is_solved()))
     #print("Jeli stanje konacno: ", igra.is_terminal())
     #kopiranoStanje = igra.copy()
-    print(igra.next_states())
+    # print(igra.next_states())
     akcije = igra.all_actions()
     igra.action(akcije[0])
 
@@ -215,8 +226,13 @@ if __name__ == '__main__':
     print(igra)
     print(igra.is_terminal())
     generate(d, igra)
-    pprint.pprint(d)
-    print(len(d))
-    Dfs(igra)
+    # pprint.pprint(d)
+    # print(len(d))
+    pprint.pprint(Dfs(igra, listaParentChild))
+    print("---------------------------------------------------")
+    for el in listaParentChild:
+        print("Parent el: {0}, Child element: {1}".format(
+            el[0].__str__(), el[1].__str__()))
+
     #akcija = igra.action(choice(stanjaMoguca))
     # igra.undo_action(akcija)
