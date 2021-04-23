@@ -1,7 +1,8 @@
 import copy
 import pprint
 from random import choice
-from collections import deque
+from collections import defaultdict, deque
+from collections import OrderedDict
 # Vuk Koza Kupus ________
 # 1. VUK KUPUS _______ KOZA
 # 2, Odnosi kupus uzima kozu
@@ -187,10 +188,13 @@ def Dfs(igra, lista):
     ck = igra.copy()
     q = []
     visited = {}
-    q.append((ck, ck))
+    q.append((None, ck))
     while q:
         k = q.pop()
         ck = k[1].copy()
+        if ck.is_solved():
+            lista.append(k)
+            return False
         if ck.is_terminal():
             continue
         if ck.__str__() not in visited:
@@ -202,37 +206,147 @@ def Dfs(igra, lista):
     return visited
 
 
+def Bfs(igra, lista):
+    ck = igra.copy()
+    q = []
+    visited = {}
+    q.append((None, ck))
+    while q:
+        k = q.pop(0)
+        ck = k[1].copy()
+        if ck.is_solved():
+            lista.append(k)
+            return False
+        if ck.is_terminal():
+            continue
+        if ck.__str__() not in visited:
+            lista.append(k)
+            visited[ck.__str__()] = ck
+            igra.changeState(ck.__str__())
+            for stanje in igra.next_states():
+                q.append((ck, stanje.copy()))
+    return visited
+
+
+def listaUdictNova(lista, dict):
+    for el in lista:
+        dict[el[0].__str__()].append(el[1].__str__())
+
+
+def ispisPuta(d, zadnjiEl):
+    put = []
+    put.append(zadnjiEl)
+    while arePermutation("".join(zadnjiEl[:4]), "VOKB") == False:
+        for keys, values in d.items():
+            if "B" in "".join(zadnjiEl[-4:]):
+                if arePermutation("".join(choice(values)[-4:]), "".join(zadnjiEl)[-4:]):
+                    zadnjiEl = keys
+                    put.append(copy.deepcopy(zadnjiEl))
+                    break
+            else:
+                if arePermutation("".join(choice(values)[:4]), "".join(zadnjiEl[:4])):
+                    zadnjiEl = keys
+                    put.append(copy.deepcopy(zadnjiEl))
+                    break
+    return put
+
+
+def Bestfs(igra, lista, heuristic):
+    ck = igra.copy()
+    q = []
+    visited = {}
+    q.append((None, ck))
+    while q:
+        k = q.pop(0)
+        ck = k[1].copy()
+        if ck.is_solved():
+            lista.append(k)
+            return False
+        if ck.is_terminal():
+            continue
+        if ck.__str__() not in visited:
+            lista.append(k)
+            visited[ck.__str__()] = ck
+            igra.changeState(ck.__str__())
+            for stanje in igra.next_states():
+                q.append((ck, stanje.copy()))
+            q = sorted(q, key=heuristic)
+    return visited
+
+
+def heuristic_1(state):
+    h = state[1].__str__()
+    h = h[-4:]
+    brojac = 0
+    for el in h:
+        if el != "-":
+            brojac = brojac+1
+    return brojac
+
+
 if __name__ == '__main__':
     # Deklariranje i inicijaliziranje varijabli
     d = {}
+    d2 = defaultdict(list)
+    d3 = defaultdict(list)
+    d4 = OrderedDict()
+    experimentDict = defaultdict(list)
+    ListaStanja = []
     listaParentChild = []
-    dictParentChild = {}
+    listaParentChildBfs = []
+    experimentList = []
     # Pozivanje funkcija
     igra = Stanje("VOKB  ||  ----")
     print("Pocetno stanje: ", igra)
     print(igra.is_terminal())
-    #stanjaMoguca, akcijeMoguce = igra.next_states()
+    # stanjaMoguca, akcijeMoguce = igra.next_states()
     # pprint.pprint(stanjaMoguca)
-    #print("Jeli igra rijesena: {0}".format(igra.is_solved()))
-    #print("Jeli stanje konacno: ", igra.is_terminal())
-    #kopiranoStanje = igra.copy()
+    # print("Jeli igra rijesena: {0}".format(igra.is_solved()))
+    # print("Jeli stanje konacno: ", igra.is_terminal())
+    # kopiranoStanje = igra.copy()
     # print(igra.next_states())
-    akcije = igra.all_actions()
-    igra.action(akcije[0])
+    #akcije = igra.all_actions()
+    # igra.action(akcije[0])
 
-    print(igra)
-    print(igra.is_terminal())
-    igra.undo_action(akcije[0])
-    print(igra)
-    print(igra.is_terminal())
-    generate(d, igra)
+    # print(igra)
+    # print(igra.is_terminal())
+    # igra.undo_action(akcije[0])
+    # print(igra)
+    # print(igra.is_terminal())
+    # generate(d, igra) ##
     # pprint.pprint(d)
     # print(len(d))
-    pprint.pprint(Dfs(igra, listaParentChild))
-    print("---------------------------------------------------")
-    for el in listaParentChild:
-        print("Parent el: {0}, Child element: {1}".format(
-            el[0].__str__(), el[1].__str__()))
 
-    #akcija = igra.action(choice(stanjaMoguca))
-    # igra.undo_action(akcija)
+    igra = Stanje("VOKB  ||  ----")
+    print("---------------------------------------------------")
+    Dfs(igra, listaParentChild)
+    listaUdictNova(listaParentChild, d2)
+    pprint.pprint(d2)
+    temp = list(d2)[-1:]
+    temp = "".join(temp)
+    put = ispisPuta(d2, d2[temp])
+    put.reverse()
+    pprint.pprint("THE REAL PUT FOR DFS IS:{0}".format(put))
+    print("---------------------------------------------------")
+
+    igra = Stanje("VOKB  ||  ----")
+    Bfs(igra, listaParentChildBfs)
+    listaUdictNova(listaParentChildBfs, d3)
+    temp = list(d3)[-1:]
+    temp = "".join(temp)
+    #put = ispisPutaNovo(d3, d3[temp])
+    put = ispisPuta(d3, d3[temp])
+    pprint.pprint(d3)
+    put.reverse()
+    pprint.pprint("THE REAL PUT FOR BFS IS:{0}".format(put))
+    print("---------------------------------------------------")
+
+    igra = Stanje("VOKB  ||  ----")
+    Bestfs(igra, experimentList, heuristic_1)
+    listaUdictNova(experimentList, experimentDict)
+    pprint.pprint(experimentDict)
+    temp = list(experimentDict)[-1:]
+    temp = "".join(temp)
+    put = ispisPuta(experimentDict, experimentDict[temp])
+    put.reverse()
+    pprint.pprint("THE REAL PUT FOR BESTFS IS:{0}".format(put))
