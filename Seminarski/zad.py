@@ -2,12 +2,12 @@
 # Krenite pa ćemo se čuti oko detalja.
 ''' Ideja
 Najbolja akcija je s najslabijom kartom dobit turn '''
-
+import copy
 from random import choice, shuffle
 import copy
 import random
 from typing import KeysView
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 
 class Card:
@@ -66,11 +66,18 @@ class Deck(Cards):   # Nasljeduje klasu Cards
 
 
 class Ruka():
+    flag = 0
     igracOdigranaKarta = ""
+    racunaloOdigranaKarta = ""
     igracDobioRuku = 0
     RacunaloDobiloRuku = 0
+    TkoJeDobioRuku = ""
+    j = 0
 
-    def __init__(self, cards, igrac):
+    def __init__(self, cards, igrac, najboljaKartaRac):
+        if(Ruka.flag == 0):
+            # Ruka.TkoJeDobioRuku = igrac
+            Ruka.flag += 1
         # Igrac
         if(igrac == "human"):
             print("Moja ruka {0}".format(cards))
@@ -84,19 +91,53 @@ class Ruka():
             # Pokušavam maknut empty string ali neuspješno
             cards = [x for x in cards if x != ""]
             self._ruka = cards
+            Ruka.j += 1
         # Racunalo
         if(igrac == "AI"):
+            flagJeliOdigraoSto = 0
+            sorted_dict = {}
             print("Racunalo ruka {0}".format(cards))
-            odigrajKartuRacunalo, jeliIstiTip = self.racunaloOdabir(
-                cards, Ruka.igracOdigranaKarta)
+
+            # Sortiranje dictionarya
+            sorted_tuples = sorted(najboljaKartaRac.items(
+            ), key=lambda item: item[1], reverse=True)
+            sorted_dict = {k: v for k, v in sorted_tuples}
+
+            for key, value in sorted_dict.items():
+                if Ruka.TkoJeDobioRuku == "human":
+                    if self.jeli_isti_tip(key, Ruka.igracOdigranaKarta) == 1:
+                        odigrajKartuRacunalo = "["+str(key)+"]"
+                        flagJeliOdigraoSto = 1
+                        break
+
+                else:
+                    odigrajKartuRacunalo = "["+str(key)+"]"
+                    flagJeliOdigraoSto = 1
+                    break
+
+            if(flagJeliOdigraoSto == 0):
+                odigrajKartuRacunalo = min(
+                    sorted_dict, key=sorted_dict.get)
+                odigrajKartuRacunalo = "["+str(key)+"]"
+
+            # Karta odabrana sortiranje gotovo
+
+            Ruka.racunaloOdigranaKarta = odigrajKartuRacunalo
             print("ODIGRANA KARTA RACUNALA JE:{0}\n".format(
                 odigrajKartuRacunalo))
-            self.tkoNosiRuku(Ruka.igracOdigranaKarta,
-                             odigrajKartuRacunalo, jeliIstiTip)
             cards.remove(odigrajKartuRacunalo)
             # Pokušavam maknut empty string ali neuspješno
             cards[:] = [x for x in cards if x != ""]
             self._ruka = cards
+            Ruka.j += 1
+            flagJeliOdigraoSto = 0
+
+        if Ruka.j == 2:
+            jeliIstiTip = self.jeli_isti_tip(
+                Ruka.racunaloOdigranaKarta, Ruka.igracOdigranaKarta)
+            self.tkoNosiRuku(Ruka.igracOdigranaKarta,
+                             Ruka.racunaloOdigranaKarta, jeliIstiTip)
+            Ruka.j = 0
 
     def changeHandState(self):
         return Cards(self._ruka)
@@ -106,37 +147,317 @@ class Ruka():
         for el in cards:
             # Ako su oba jednoznamenkasta broja
             if((el[2] == igracevaKarta[2]) and el[2] not in Card.CARDS_VALUE.keys()):
-                return el, 1
+                return 1
             # Ako je igracev broj dvoznamenkasta racunalov jednoznamenkast
             if((el[2] == igracevaKarta[3]) and el[2] not in Card.CARDS_VALUE.keys()):
-                return el, 1
+                return 1
             # Ako je racunalunalov broj dvoznamenkast a igracev dvoznamenkast
             if((el[3] == igracevaKarta[2]) and el[3] not in Card.CARDS_VALUE.keys()):
-                return el, 1
+                return 1
             # Ako su oba dvoznamenkasta broja
             if((el[3] == igracevaKarta[3]) and el[3] not in Card.CARDS_VALUE.keys()):
-                return el, 1
+                return 1
 
-        return random.choice(cards), 0
+        return 0
         # Dodatna return vrijednost oznacava jeli istog tipa, 1 oznacava da je, 0 oznacava da nije
 
-    def random_rollout(self, cards, igracevaKarta):
-        while not self.terminal(cards):
-            a = choice(cards)  # Random odabiremo?
-            self.do(a)  # sto bi do trebao raditi
-        # Sto bi reward trebao provjeravati, jeli pokupio ruku s najslabijom mogucom kartom u ruci?
-        return self.reward()
+    def igranjeIgre(self, tkoIgraPrvi, IgracRuka, racunaloRuka, igra, najboljaKartaRac):
+        jeliIgracRukaPrazna = 0
+        jeliRacunaloRukaPrazna = 0
+        print("PRVI IGRA", end=" ")
+        print("\033[1m" + tkoIgraPrvi + "\033[0m")
 
-    def terminal(self, cards):
-        if len(cards) == 0:
-            return True
+        if tkoIgraPrvi == "human":
+          # Igrac prvi
+            if (type(IgracRuka) != list):
+                IgracRuka = Ruka(IgracRuka.toString().split(
+                    ","), "human", najboljaKartaRac).changeHandState()
+                IgracRuka = IgracRuka.toString().split(
+                    ",")+igra.drawOne().toString().split(",")
+
+            else:
+                # Igrac
+                IgracRuka = Ruka(
+                    IgracRuka, "human", najboljaKartaRac).changeHandState()
+                if(IgracRuka.count() == 0):
+                    jeliIgracRukaPrazna = 1
+                if(igra.count() != 0):
+                    IgracRuka = IgracRuka.toString().split(
+                        ",")+igra.drawOne().toString().split(",")
+                else:
+                    IgracRuka = IgracRuka.toString().split(
+                        ",")
+
+                IgracRuka = [x.strip(' ') for x in IgracRuka]
+
+            # Racunalo
+            if (type(racunaloRuka) != list):
+                racunaloRuka = Ruka(racunaloRuka.toString().split(
+                    ","), "AI", najboljaKartaRac).changeHandState()
+                racunaloRuka = racunaloRuka.toString().split(
+                    ",")+igra.drawOne().toString().split(",")
+
+            else:
+                # Racunalo
+                racunaloRuka = Ruka(
+                    racunaloRuka, "AI", najboljaKartaRac).changeHandState()
+                if(racunaloRuka.count() == 0):
+                    jeliRacunaloRukaPrazna = 1
+                if(igra.count() != 0):  # Ako je deck prazan ne vuci nego samo ucitaj proslo stanje
+                    racunaloRuka = racunaloRuka.toString().split(
+                        ",")+igra.drawOne().toString().split(",")
+                else:
+                    racunaloRuka = racunaloRuka.toString().split(
+                        ",")
+                racunaloRuka = [x.strip(' ') for x in racunaloRuka]
+
+        elif (tkoIgraPrvi == "AI"):
+
+            # Racunalo
+            if (type(racunaloRuka) != list):
+                racunaloRuka = Ruka(racunaloRuka.toString().split(
+                    ","), "AI", najboljaKartaRac).changeHandState()
+                racunaloRuka = racunaloRuka.toString().split(
+                    ",")+igra.drawOne().toString().split(",")
+
+            else:
+                # Racunalo
+                racunaloRuka = Ruka(
+                    racunaloRuka, "AI", najboljaKartaRac).changeHandState()
+                if(racunaloRuka.count() == 0):
+                    jeliRacunaloRukaPrazna = 1
+                if(igra.count() != 0):  # Ako je deck prazan ne vuci nego samo ucitaj proslo stanje
+                    racunaloRuka = racunaloRuka.toString().split(
+                        ",")+igra.drawOne().toString().split(",")
+                else:
+                    racunaloRuka = racunaloRuka.toString().split(
+                        ",")
+                racunaloRuka = [x.strip(' ') for x in racunaloRuka]
+
+            if (type(IgracRuka) != list):
+                IgracRuka = Ruka(IgracRuka.toString().split(
+                    ","), "human", najboljaKartaRac).changeHandState()
+                IgracRuka = IgracRuka.toString().split(
+                    ",")+igra.drawOne().toString().split(",")
+
+            else:
+                # Igrac
+                IgracRuka = Ruka(
+                    IgracRuka, "human", najboljaKartaRac).changeHandState()
+                if(IgracRuka.count() == 0):
+                    jeliIgracRukaPrazna = 1
+                if(igra.count() != 0):
+                    IgracRuka = IgracRuka.toString().split(
+                        ",")+igra.drawOne().toString().split(",")
+                else:
+                    IgracRuka = IgracRuka.toString().split(
+                        ",")
+
+                IgracRuka = [x.strip(' ') for x in IgracRuka]
+
+               # Kada ruka bude prazna
+           # return IgracRuka, racunaloRuka, 1
+        if((jeliIgracRukaPrazna and jeliRacunaloRukaPrazna) == 1):
+            return IgracRuka, racunaloRuka, 1
+        print("Ostalo je: {0} karata u deku".format(igra.count()))
+        print("///////////////////////\n///////////////////////\n")
+        return IgracRuka, racunaloRuka, 0
+
+    def best_action(self):  # FLAT mc
+        odigraneKarteINagrada = defaultdict()
+        karteCopy = copy.deepcopy(self)
+
+        if (type(self.racunaloRuka) != list):
+            karteRacunalo = copy.deepcopy(
+                self.racunaloRuka.toString().split(","))
         else:
-            return False
+            karteRacunalo = copy.deepcopy(self.racunaloRuka)
 
-    def reward(self, cards):
-        if len(cards) == 0:
+        if (type(self.IgracRuka) != list):
+            IgracRuka = copy.deepcopy(
+                self.IgracRuka.toString().split(","))
+        else:
+            IgracRuka = copy.deepcopy(self.IgracRuka)
+
+        # Pocetak algoritma
+        for racunaloKarta in karteRacunalo:
+            v = 0
+            flagMin = 0
+            flagAs = 0
+            for karta in IgracRuka:
+                jeliIstiTip = karteCopy.do(
+                    racunaloKarta, karta)  # Jeli isti tip
+                # Vrati nagradu ovisno koja je karta
+                addToV, flagMin, flagAs = karteCopy.reward(
+                    karta, racunaloKarta, jeliIstiTip, flagMin, flagAs)
+                v += addToV
+
+                konacnaKarta = str(racunaloKarta)[1:-1]
+                odigraneKarteINagrada[konacnaKarta] = v
+        print(odigraneKarteINagrada)
+        # bestRacunaloKarta = max(odigraneKarteINagrada.keys(), key=(
+        # lambda k: odigraneKarteINagrada[k]))
+        return odigraneKarteINagrada
+
+    def reward(self, kartarac1, kartarac2, jeliIstiTip, flagMin, flagAs):
+        nagrada = 0
+        flagMinn = 0
+        flagAss = 0
+        # Pobjeduje li trenutna karta
+        if self.tkoNosiRukuSim(kartarac1, kartarac2, jeliIstiTip) == "AI":
+            if(flagMin == 0):
+                v, flagMinn = self.jeliKartaMinimalnaIstogTipa(kartarac2)
+                if(v) == 4:
+                    nagrada += 4
+            nagrada += 1
+        if(flagAs == 0):
+            nagradaAs, flagAss = self.bacamLiAsa(
+                kartarac2, Ruka.TkoJeDobioRuku)
+            nagrada += nagradaAs
+        return nagrada, flagMinn, flagAss
+
+    def jeliKartaMinimalnaIstogTipa(self, karta):
+        listaIstih = []
+        jacinaKarte = ""
+        if (type(self.racunaloRuka) != list):
+            karteRacunalo = copy.deepcopy(
+                self.racunaloRuka.toString().split(","))
+        else:
+            karteRacunalo = copy.deepcopy(self.racunaloRuka)
+
+        for el in karteRacunalo:
+            if self.jeli_isti_tip(el, karta) == 1:
+                listaIstih.append(el)
+                # Dodati iako nije isti a bacio najmanju "lisinu" daj 0.5 boda?
+        if not listaIstih:
+            return 0, 0
+        jacinaIKartaLista = []
+        for el in listaIstih:
+            if((el[1] and el[2]) in Card.CARDS_VALUE.keys()):
+                jacinaKarte = Card.CARDS_VALUE[str(
+                    el[1])+str(el[2])]
+            else:
+                jacinaKarte = int(Card.CARDS_VALUE[el[1]])
+
+            jacinaIKartaLista.append((jacinaKarte, el))
+        minClan = min(jacinaIKartaLista, key=lambda t: t[0])
+        if karta == minClan[1]:
+            return 4, 1
+        return 0, 0
+
+    def bacamLiAsa(self, karta, jeliRacunalaRed):
+        if((karta[1]) == "1") and (karta[2] not in Card.CARDS_VALUE.keys()):
+            if(jeliRacunalaRed == "AI"):
+                return 10, 1
+            BrojKarataKojeKupeAs = 0
+        else:
+            return 0, 0
+
+        if (type(self.IgracRuka) != list):
+            IgracRuka = copy.deepcopy(
+                self.IgracRuka.toString().split(","))
+        else:
+            IgracRuka = copy.deepcopy(self.IgracRuka)
+
+        for el in IgracRuka:
+            if((el[1] and el[2]) in Card.CARDS_VALUE.keys()):
+                jacinaKarte = Card.CARDS_VALUE[str(
+                    el[1])+str(el[2])]
+            else:
+                jacinaKarte = int(Card.CARDS_VALUE[el[1]])
+
+            if jacinaKarte > 8:
+                BrojKarataKojeKupeAs += 2
+
+            return -BrojKarataKojeKupeAs, 1
+
+    def jeli_isti_tip(self, kartaRacunala, kartaRacunala2):
+        # Ako su oba jednoznamenkasta broja
+        if((kartaRacunala[2] == kartaRacunala2[2]) and kartaRacunala[2] not in Card.CARDS_VALUE.keys()):
             return 1
+        # Ako je igracev broj dvoznamenkasta racunalov jednoznamenkast
+        if((kartaRacunala[2] == kartaRacunala2[3]) and kartaRacunala[2] not in Card.CARDS_VALUE.keys()):
+            return 1
+        # Ako je racunalunalov broj dvoznamenkast a igracev dvoznamenkast
+        if((kartaRacunala[3] == kartaRacunala2[2]) and kartaRacunala[3] not in Card.CARDS_VALUE.keys()):
+            return 1
+        # Ako su oba dvoznamenkasta broja
+        if((kartaRacunala[3] == kartaRacunala2[3]) and kartaRacunala[3] not in Card.CARDS_VALUE.keys()):
+            return 1
+
         return 0
+
+    def do(self, kartaRac1, kartaRac2):
+        # Igrac
+        cards = self.IgracRuka
+        odigrajKartuIgrac = kartaRac1
+
+        # Racunalo
+        cards = self.racunaloRuka
+        odigrajKartuRacunalo = kartaRac2
+
+        if self.jeli_isti_tip(odigrajKartuIgrac, odigrajKartuRacunalo) == 1:
+            return 1
+        else:
+            return 0
+
+    def tkoNosiRukuSim(self, igracevaKarta, racunaloKarta, jeliIstiTip):
+        if((type(igracevaKarta) and type(racunaloKarta)) != list):
+            igracevaKarta.strip(" ")
+            racunaloKarta.strip(" ")
+
+        if((igracevaKarta[1] and igracevaKarta[2]) in Card.CARDS_VALUE.keys()):
+            kartaIgrac = Card.CARDS_VALUE[str(
+                igracevaKarta[1])+str(igracevaKarta[2])]
+        else:
+            kartaIgrac = Card.CARDS_VALUE[igracevaKarta[1]]
+
+        if((racunaloKarta[1] and racunaloKarta[2]) in Card.CARDS_VALUE.keys()):
+            kartaRacunalo = Card.CARDS_VALUE[str(
+                racunaloKarta[1])+str(racunaloKarta[2])]
+        else:
+            kartaRacunalo = Card.CARDS_VALUE[racunaloKarta[1]]
+
+        if(jeliIstiTip == 1):
+            if(kartaIgrac > kartaRacunalo):
+                if(Ruka.TkoJeDobioRuku == "human"):
+                    # print("Igrac dobio ruku")
+                    return "igrac"
+                elif(Ruka.TkoJeDobioRuku == "AI"):
+                    # print("Igrac dobio ruku")
+                    return "igrac"
+
+            elif(kartaIgrac < kartaRacunalo):
+                if(Ruka.TkoJeDobioRuku == "human"):
+                    # print("Racunalo dobilo ruku")
+                    return "AI"
+                elif(Ruka.TkoJeDobioRuku == "AI"):
+                    # print("Racunalo dobilo ruku")
+                    return "AI"
+        else:
+            if(kartaIgrac > kartaRacunalo):
+                if(Ruka.TkoJeDobioRuku == "human"):
+                    # print("Igrac dobio ruku")
+                    return "igrac"
+                elif(Ruka.TkoJeDobioRuku == "AI"):
+                    # print("Racunalo dobilo ruku")
+                    return "AI"
+
+            elif(kartaIgrac < kartaRacunalo):
+                if(Ruka.TkoJeDobioRuku == "human"):
+                    # print("Igrac dobio ruku")
+                    return "igrac"
+                elif(Ruka.TkoJeDobioRuku == "AI"):
+                    # print("Racunalo dobilo ruku")
+                    return "AI"
+
+            if(kartaIgrac == kartaRacunalo):
+                if(Ruka.TkoJeDobioRuku == "human"):
+                    # print("Igrac dobio ruku")
+                    return"igrac"
+                else:
+                    # print("Racunalo dobilo ruku")
+                    return "AI"
 
     def tkoNosiRuku(self, igracevaKarta, racunaloKarta, jeliIstiTip):
         igracevaKarta.strip(" ")
@@ -144,76 +465,86 @@ class Ruka():
         if((igracevaKarta[1] and igracevaKarta[2]) in Card.CARDS_VALUE.keys()):
             kartaIgrac = Card.CARDS_VALUE[str(
                 igracevaKarta[1])+str(igracevaKarta[2])]
-        kartaIgrac = Card.CARDS_VALUE[igracevaKarta[1]]
+        else:
+            kartaIgrac = Card.CARDS_VALUE[igracevaKarta[1]]
 
         if((racunaloKarta[1] and racunaloKarta[2]) in Card.CARDS_VALUE.keys()):
             kartaRacunalo = Card.CARDS_VALUE[str(
                 racunaloKarta[1])+str(racunaloKarta[2])]
-        kartaRacunalo = Card.CARDS_VALUE[racunaloKarta[1]]
+        else:
+            kartaRacunalo = Card.CARDS_VALUE[racunaloKarta[1]]
 
-        if(kartaIgrac > kartaRacunalo):
-            print("Igrac dobio ruku")
-            Ruka.igracDobioRuku = Ruka.igracDobioRuku+1
-        if((kartaIgrac < kartaRacunalo) and jeliIstiTip == 1):
-            print("Racunalo dobilo ruku")
-            Ruka.RacunaloDobiloRuku = Ruka.RacunaloDobiloRuku+1
-        if(kartaIgrac == kartaRacunalo):
-            print("Igrac dobio ruku")
-            Ruka.igracDobioRuku = Ruka.igracDobioRuku+1
-        if((kartaIgrac < kartaRacunalo) and jeliIstiTip == 0):
-            print("Igrac dobio ruku")
-            Ruka.igracDobioRuku = Ruka.igracDobioRuku+1
+        if(jeliIstiTip == 1):
+            if(kartaIgrac > kartaRacunalo):
+                if(Ruka.TkoJeDobioRuku == "human"):
+                    print("Igrac dobio ruku")
+                    Ruka.igracDobioRuku = Ruka.igracDobioRuku+1
+                    Ruka.TkoJeDobioRuku = "human"
+                elif(Ruka.TkoJeDobioRuku == "AI"):
+                    print("Igrac dobio ruku")
+                    Ruka.igracDobioRuku = Ruka.igracDobioRuku+1
+                    Ruka.TkoJeDobioRuku = "human"
+
+            elif(kartaIgrac < kartaRacunalo):
+                if(Ruka.TkoJeDobioRuku == "human"):
+                    print("Racunalo dobilo ruku")
+                    Ruka.RacunaloDobiloRuku = Ruka.RacunaloDobiloRuku+1
+                    Ruka.TkoJeDobioRuku = "AI"
+                elif(Ruka.TkoJeDobioRuku == "AI"):
+                    print("Racunalo dobilo ruku")
+                    Ruka.RacunaloDobiloRuku = Ruka.RacunaloDobiloRuku+1
+                    Ruka.TkoJeDobioRuku = "AI"
+        else:
+            if(kartaIgrac > kartaRacunalo):
+                if(Ruka.TkoJeDobioRuku == "human"):
+                    print("Igrac dobio ruku")
+                    Ruka.igracDobioRuku = Ruka.igracDobioRuku+1
+                    Ruka.TkoJeDobioRuku = "human"
+                elif(Ruka.TkoJeDobioRuku == "AI"):
+                    print("Racunalo dobilo ruku")
+                    Ruka.RacunaloDobiloRuku = Ruka.RacunaloDobiloRuku+1
+                    Ruka.TkoJeDobioRuku = "AI"
+
+            elif(kartaIgrac < kartaRacunalo):
+                if(Ruka.TkoJeDobioRuku == "human"):
+                    print("Igrac dobio ruku")
+                    Ruka.igracDobioRuku = Ruka.igracDobioRuku+1
+                    Ruka.TkoJeDobioRuku = "human"
+                elif(Ruka.TkoJeDobioRuku == "AI"):
+                    print("Racunalo dobilo ruku")
+                    Ruka.RacunaloDobiloRuku = Ruka.RacunaloDobiloRuku+1
+                    Ruka.TkoJeDobioRuku = "AI"
+
+            if(kartaIgrac == kartaRacunalo):
+                if(Ruka.TkoJeDobioRuku == "human"):
+                    print("Igrac dobio ruku")
+                    Ruka.igracDobioRuku = Ruka.igracDobioRuku+1
+                    Ruka.TkoJeDobioRuku = "human"
+                else:
+                    print("Racunalo dobilo ruku")
+                    Ruka.RacunaloDobiloRuku = Ruka.RacunaloDobiloRuku+1
+                    Ruka.TkoJeDobioRuku = "AI"
 
 
-class Treseta():
+class Treseta(Ruka):
     def __init__(self):
         print("Dobrodosli u tresetu \n")
         self.igra = Deck()
         self.igra.shuffle()
-
-        self.IgracRuka = self.igra.deal(4)
-        self.racunaloRuka = self.igra.deal(4)
+        self.IgracRuka = self.igra.deal(10)
+        self.racunaloRuka = self.igra.deal(10)
+        self.igraci = ["AI", "human"]
+        self.tkoPrviIgra = choice(self.igraci)
+        Ruka.TkoJeDobioRuku = self.tkoPrviIgra
 
         while(True):
-            # Igrac
-            if (type(self.IgracRuka) != list):
-                self.IgracRuka = Ruka(self.IgracRuka.toString().split(
-                    ","), "human").changeHandState()
-                self.IgracRuka = self.IgracRuka.toString().split(
-                    ",")+self.igra.drawOne().toString().split(",")
-
-            # Racunalo
-                self.racunaloRuka = Ruka(self.racunaloRuka.toString().split(
-                    ","), "AI").changeHandState()
-                self.racunaloRuka = self.racunaloRuka.toString().split(
-                    ",")+self.igra.drawOne().toString().split(",")
-
-            else:
-                # Igrac
-                self.IgracRuka = Ruka(
-                    self.IgracRuka, "human").changeHandState()
-                if(self.igra.count() != 0):
-                    self.IgracRuka = self.IgracRuka.toString().split(
-                        ",")+self.igra.drawOne().toString().split(",")
-                else:
-                    self.IgracRuka = self.IgracRuka.toString().split(
-                        ",")
-                self.IgracRuka = [x.strip(' ') for x in self.IgracRuka]
-                # Racunalo
-                self.racunaloRuka = Ruka(
-                    self.racunaloRuka, "AI").changeHandState()
-                if(self.racunaloRuka.count() == 0):       # Kada ruka bude prazna
-                    break
-                if(self.igra.count() != 0):  # Ako je deck prazan ne vuci nego samo ucitaj proslo stanje
-                    self.racunaloRuka = self.racunaloRuka.toString().split(
-                        ",")+self.igra.drawOne().toString().split(",")
-                else:
-                    self.racunaloRuka = self.racunaloRuka.toString().split(
-                        ",")
-                self.racunaloRuka = [x.strip(' ') for x in self.racunaloRuka]
-
-            print("Ostalo je: {0} karata u deku".format(self.igra.count()))
-            print("///////////////////////\n///////////////////////\n")
+            # Pregledaj ko je zadnju  ruku dobiu (napisi funkciju)
+            bestRacunaloODabir = self.best_action()
+            self.IgracRuka, self.racunaloRuka, igra = self.igranjeIgre(
+                self.tkoPrviIgra, self.IgracRuka, self.racunaloRuka, self.igra, bestRacunaloODabir)
+            if igra == 1:
+                break
+            self.tkoPrviIgra = Ruka.TkoJeDobioRuku
 
         if(Ruka.igracDobioRuku > Ruka.RacunaloDobiloRuku):
             print("Igrac je dobio partiju s dobivenih: {0} ruku \n racunalo ima: {1} dobivenih".format(
